@@ -14,9 +14,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -202,12 +204,12 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 
         @Override
         public Fragment createFragment(int position){
-            return new imageFragment();
+            return imageFragment.newInstance(image_list.get(position));
         }
 
         @Override
         public int getItemCount(){
-            return NUM_PAGES;
+            return image_list.size();
         }
     }
 
@@ -268,21 +270,22 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 //                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 //                    null,null,null,null);
             cursor = contentResolver.query(MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL),null,null,null,null);
-            System.out.println(cursor.getPosition());
-            System.out.println(cursor.getCount());
+//            System.out.println(cursor.getPosition());
+//            System.out.println(cursor.getCount());
             if(cursor != null && cursor.moveToFirst()){
                 String str = String.format("MediaStore.Images = %s\n\n", cursor.getCount());
                 System.out.println(str);
                 do {
-                    @SuppressLint("Range") image tmp_img = new image(
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media._ID)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA))
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.TITLE));
+                    String data = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
-                    );
+                    image tmp_img = new image(contentUri,id,title,data);
                     image_list.add(tmp_img);
                 }while(cursor.moveToNext());
                 cursor.close();
+
             }
 
         }catch(Exception e){
