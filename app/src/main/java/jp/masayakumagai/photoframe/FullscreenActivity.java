@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.MotionEventCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -27,6 +28,8 @@ import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +42,19 @@ import jp.masayakumagai.photoframe.databinding.ActivityFullscreenBinding;
  */
 public class FullscreenActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            Toast.makeText(this,"OK",Toast.LENGTH_SHORT);
+        }
+
+        return super.onTouchEvent(event);
+    }
+
     List<image> image_list = new ArrayList<>();
 
 
-    private static final int NUM_PAGES = 5;
+//    private static final int NUM_PAGES = 5;
 
     private ViewPager2 viewPager;
 
@@ -143,10 +155,12 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         mVisible = true;
         mControlsView = binding.fullscreenContentControls;
         mContentView = binding.imageContent;
-
+        mContentView = findViewById(R.id.button_fullscreen);
+//        TODO: start off with this button
         viewPager = findViewById(R.id.image_content);
         pagerAdapter = new imageFragmentPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
+
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -161,6 +175,8 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         // while interacting with the UI.
         binding.dummyButton.setOnTouchListener(mDelayHideTouchListener);
     }
+
+
 
     @Override
     protected void onResume(){
@@ -182,8 +198,6 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 //
 //            }
         }
-
-
     }
 
     @Override
@@ -196,6 +210,8 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         delayedHide(100);
     }
 
+
+
     private class imageFragmentPagerAdapter extends FragmentStateAdapter{
 
         public imageFragmentPagerAdapter(FragmentActivity fa){
@@ -204,6 +220,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 
         @Override
         public Fragment createFragment(int position){
+
             return imageFragment.newInstance(image_list.get(position));
         }
 
@@ -297,4 +314,8 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         }
     }
 
+
 }
+
+
+

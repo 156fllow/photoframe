@@ -1,5 +1,6 @@
 package jp.masayakumagai.photoframe;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ public class imageFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private image img;
+    private ImageView imageView ;
 
     /**
      * Use this factory method to create a new instance of
@@ -42,7 +44,6 @@ public class imageFragment extends Fragment {
     // TODO: Rename and change types and number of parameters
     public static imageFragment newInstance(image param) {
         imageFragment fragment = new imageFragment(param);
-
         return fragment;
     }
 
@@ -57,15 +58,16 @@ public class imageFragment extends Fragment {
 
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_image, container, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
-//TODO uri -> bitmap not able to do
+        imageView = (ImageView) view.findViewById(R.id.imageView);
         File bitmap_file = new File(img.getPath());
         Bitmap bitmap = null;
+
         try (InputStream stream = new FileInputStream(bitmap_file)) {
             bitmap = BitmapFactory.decodeStream(new BufferedInputStream(stream));
         } catch (FileNotFoundException e) {
@@ -76,6 +78,11 @@ public class imageFragment extends Fragment {
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
         }
+
         return view;
+    }
+
+    public ImageView getImageView() {
+        return imageView;
     }
 }

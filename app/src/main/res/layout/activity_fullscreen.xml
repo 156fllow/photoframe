@@ -14,10 +14,19 @@
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
 
+    <Button
+        android:id="@+id/button_fullscreen"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="x"
+        android:visibility="visible" />
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/image_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
+
+    </androidx.viewpager2.widget.ViewPager2>
 
     <FrameLayout
         android:layout_width="match_parent"
