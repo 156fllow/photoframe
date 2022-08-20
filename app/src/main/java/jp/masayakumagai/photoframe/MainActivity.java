@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.button_play).setOnClickListener(this);
+        findViewById(R.id.button_settings).setOnClickListener(this);
     }
 
     @Override
@@ -24,6 +25,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, FullscreenActivity.class);
             startActivity(intent);
             Snackbar.make(v,"OK", Snackbar.LENGTH_SHORT).show();
+        }
+        else if(v.getId() == R.id.button_settings){
+            Intent intent = new Intent(MainActivity.this,SettingsActivity.class);
+            startActivity(intent);
+
         }
     }
 }
