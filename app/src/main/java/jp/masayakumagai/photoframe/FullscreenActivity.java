@@ -16,7 +16,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -33,6 +35,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import jp.masayakumagai.photoframe.databinding.ActivityFullscreenBinding;
 
@@ -41,6 +45,8 @@ import jp.masayakumagai.photoframe.databinding.ActivityFullscreenBinding;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
+
+    Timer timer;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -59,6 +65,8 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
     private ViewPager2 viewPager;
 
     private FragmentStateAdapter pagerAdapter;
+
+    final Handler handler = new Handler();
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -143,6 +151,15 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
     };
     private ActivityFullscreenBinding binding;
 
+    private long getViewtime(){
+        SharedPreferences prefs;
+        float second;
+        prefs = getSharedPreferences("settings",Context.MODE_PRIVATE);
+        second = prefs.getFloat("viewtime",5);
+        second = second * 1000;
+        return (long)(second);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,6 +191,10 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         binding.dummyButton.setOnTouchListener(mDelayHideTouchListener);
+
+
+
+
     }
 
 
@@ -198,6 +219,36 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 //
 //            }
         }
+        timer = new Timer();
+        timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        if(viewPager.getCurrentItem() == image_list.size() - 1){
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            viewPager.setCurrentItem(0);
+                                        }
+                                    });
+                                }
+                            }).start();
+                        }else {
+                            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+                        }
+                    }
+                },
+                getViewtime(),
+                getViewtime()
+        );
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        timer.cancel();
     }
 
     @Override
@@ -217,7 +268,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         public imageFragmentPagerAdapter(FragmentActivity fa){
             super(fa);
         }
-
+            int image_list_size = image_list.size();
         @Override
         public Fragment createFragment(int position){
 
@@ -226,7 +277,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
 
         @Override
         public int getItemCount(){
-            return image_list.size();
+            return image_list_size;
         }
     }
 

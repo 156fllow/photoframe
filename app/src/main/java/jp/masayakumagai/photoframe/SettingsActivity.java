@@ -22,36 +22,41 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        prefs = getPreferences(Context.MODE_PRIVATE);
+        prefs = getSharedPreferences("settings",Context.MODE_PRIVATE);
         viewtime = prefs.getFloat("viewtime",5);
         editviewtime = findViewById(R.id.editviewtime);
         editviewtime.setText(String.valueOf(viewtime));
-        editviewtime.addTextChangedListener(new EditEventListener("viewtime"));
-
-
+//        editviewtime.addTextChangedListener(new EditEventListener("viewtime"));
     }
 
-    private class EditEventListener implements TextWatcher{
-
-        String type_name;
-
-        public EditEventListener(String _type_name){
-            type_name = _type_name;
-        }
-        @Override
-        public void beforeTextChanged(CharSequence s,int start,int count,int after){
-
-        }
-        @Override
-        public void onTextChanged(CharSequence s, int start,int before,int count){
-
-        }
-        @Override
-        public void afterTextChanged(Editable s){
-            System.out.println(s.toString());
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putFloat(type_name, Float.parseFloat(s.toString()));
-            editor.apply();
-        }
+    @Override
+    protected void onPause() {
+        String type_name = "viewtime";
+        super.onPause();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putFloat(type_name, Float.parseFloat(editviewtime.getText().toString()));
+        editor.apply();
     }
+
+//    private class EditEventListener implements TextWatcher{
+//
+//        public EditEventListener(String _type_name){
+//            type_name = _type_name;
+//        }
+//        @Override
+//        public void beforeTextChanged(CharSequence s,int start,int count,int after){
+//
+//        }
+//        @Override
+//        public void onTextChanged(CharSequence s, int start,int before,int count){
+//
+//        }
+//        @Override
+//        public void afterTextChanged(Editable s){
+//            System.out.println(s.toString());
+//            SharedPreferences.Editor editor = prefs.edit();
+//            editor.putFloat(type_name, Float.parseFloat(s.toString()));
+//            editor.apply();
+//        }
+//    }
 }
