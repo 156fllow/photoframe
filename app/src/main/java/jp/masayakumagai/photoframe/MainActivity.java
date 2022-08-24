@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.button_play){
             Intent intent = new Intent(MainActivity.this, FullscreenActivity.class);
             startActivity(intent);
-            Snackbar.make(v,"OK", Snackbar.LENGTH_SHORT).show();
+//            Snackbar.make(v,"OK", Snackbar.LENGTH_SHORT).show();
         }
         else if(v.getId() == R.id.button_settings){
             Intent intent = new Intent(MainActivity.this,SettingsActivity.class);

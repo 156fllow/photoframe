@@ -3,6 +3,7 @@ package jp.masayakumagai.photoframe;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,17 +47,18 @@ import jp.masayakumagai.photoframe.databinding.ActivityFullscreenBinding;
  */
 public class FullscreenActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
 
+    private static final int PERMISSION_REQUEST_CODE = 0;
     Timer timer;
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            Toast.makeText(this,"OK",Toast.LENGTH_SHORT);
-        }
-
-        return super.onTouchEvent(event);
-    }
-
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if(event.getAction() == MotionEvent.ACTION_DOWN){
+//            Toast.makeText(this,"OK",Toast.LENGTH_SHORT).show();
+//        }
+//
+//        return super.onTouchEvent(event);
+//    }
+//    TODO when pictures are not found , back to this page
     List<image> image_list = new ArrayList<>();
 
 
@@ -161,22 +163,61 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // アラート表示中に画面回転すると length ０でコールバックされるのでガードする
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length > 0) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                readImage();
+                initializePageradapter();
+            }else{
+                Toast.makeText(this,"Please enable storage access permission",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
+            Toast.makeText(this,"Please enable storage access permission",Toast.LENGTH_LONG).show();
+            finish();
+        }
+        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_REQUEST_CODE);
+//            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
+//                Toast.makeText(this,"no");
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//            builder.setMessage("権限ほしい");
+//            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},0);
+//                }
+//            }
+//            else{
+//
+//            }
+        }else{
+            readImage();
+        }
+
         binding = ActivityFullscreenBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        readImage();
+//        if(image_list.size() == 0){
+//            Toast.makeText(this,"No picture",Toast.LENGTH_SHORT);
+//            finish();
+//        }
 
         mVisible = true;
         mControlsView = binding.fullscreenContentControls;
         mContentView = binding.imageContent;
         mContentView = findViewById(R.id.button_fullscreen);
 //        TODO: start off with this button
-        viewPager = findViewById(R.id.image_content);
-        pagerAdapter = new imageFragmentPagerAdapter(this);
-        viewPager.setAdapter(pagerAdapter);
+        initializePageradapter();
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -190,8 +231,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        binding.dummyButton.setOnTouchListener(mDelayHideTouchListener);
-
+//        binding.dummyButton.setOnTouchListener(mDelayHideTouchListener);
 
 
 
@@ -203,22 +243,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
     protected void onResume(){
         super.onResume();
 
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},0);
-//            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE));
-//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//            builder.setMessage("権限ほしい");
-//            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialogInterface, int i) {
-//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},0);
-//                }
-//            });
-//            else{
-//
-//            }
-        }
+
         timer = new Timer();
         timer.scheduleAtFixedRate(
                 new TimerTask() {
@@ -258,7 +283,7 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.
-        delayedHide(100);
+        delayedHide(1000);
     }
 
 
@@ -363,6 +388,12 @@ public class FullscreenActivity extends AppCompatActivity implements ActivityCom
                 cursor.close();
             }
         }
+    }
+
+    private void initializePageradapter(){
+        viewPager = findViewById(R.id.image_content);
+        pagerAdapter = new imageFragmentPagerAdapter(this);
+        viewPager.setAdapter(pagerAdapter);
     }
 
 
